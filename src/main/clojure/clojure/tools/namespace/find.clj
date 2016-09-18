@@ -12,6 +12,7 @@
   clojure.tools.namespace.find
   (:require [clojure.java.classpath :as classpath]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.set :as set]
             [clojure.tools.namespace.file :as file]
             [clojure.tools.namespace.parse :as parse])
@@ -49,6 +50,20 @@
   [files]
   (sort-by #(.getAbsolutePath ^File %) files))
 
+(defn- sane-ns-path
+  "Checks that the file has sane namespace definition relative to given
+  directory."
+  [dir file]
+  (let [decl (file/read-file-ns-decl file)
+        ns (parse/name-from-ns-decl decl)
+        ;; without file extension
+        correct-path (str (.getPath dir)
+                          File/separator
+                          (-> (name ns)
+                              (str/replace "-" "_")
+                              (str/replace "." File/separator))) ]
+    (.startsWith (.getPath file) correct-path)))
+
 (defn find-sources-in-dir
   "Searches recursively under dir for source files. Returns a sequence
   of File objects, in breadth-first sort order.
@@ -62,6 +77,7 @@
    (let [{:keys [extensions]} (or platform clj)]
      (->> (file-seq dir)
           (filter #(file/file-with-extension? % extensions))
+          (filter #(sane-ns-path dir %))
           sort-files-breadth-first))))
 
 (defn find-clojure-sources-in-dir

@@ -1,4 +1,4 @@
-(defproject org.clojure/tools.namespace "0.0-SNAPSHOT"
+(defproject metosin.forks/tools.namespace "0.3.0-SNAPSHOT"
   :description ""
   :parent [org.clojure/pom.contrib "0.1.2"]
   :url "https://github.com/clojure/tools.namespace"
